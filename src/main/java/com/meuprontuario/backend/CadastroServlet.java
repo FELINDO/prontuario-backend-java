@@ -20,7 +20,7 @@ public class CadastroServlet extends HttpServlet {
         Gson gson = new Gson();
         Map<String, Object> data = gson.fromJson(req.getReader(), Map.class);
 
-        // SQL ATUALIZADO para usar aspas duplas em "userType", uma boa prática no PostgreSQL
+        // SQL com aspas duplas em "userType" para máxima compatibilidade com PostgreSQL
         String sql = "INSERT INTO usuarios (\"userType\", name, cpf, password, age, sexo, alergias, historico_vacinacao, medicamentos_uso_continuo, necessita_insulina) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseUtil.getConnection(); 
@@ -31,27 +31,33 @@ public class CadastroServlet extends HttpServlet {
             stmt.setString(3, (String) data.get("cpf"));
             stmt.setString(4, (String) data.get("password"));
 
-            // CORREÇÃO: Trata o campo 'age' de forma segura, evitando erros se estiver vazio
-            String ageStr = (String) data.get("age");
-            if (ageStr != null && !ageStr.isEmpty()) {
-                stmt.setInt(5, Integer.parseInt(ageStr));
+            // --- INÍCIO DA CORREÇÃO DEFINITIVA PARA TIPOS DE DADOS ---
+            
+            // Trata o campo 'age' de forma 100% segura
+            Object ageObj = data.get("age");
+            if (ageObj != null && !String.valueOf(ageObj).isEmpty()) {
+                // Converte para String primeiro, depois para Double, e finalmente para Int
+                stmt.setInt(5, Double.valueOf(String.valueOf(ageObj)).intValue());
             } else {
                 stmt.setNull(5, Types.INTEGER);
             }
 
             stmt.setString(6, (String) data.get("sexo"));
-            stmt.setString(7, (String) data.getOrDefault("alergias", null));
-            stmt.setString(8, (String) data.getOrDefault("historico_vacinacao", null));
-            stmt.setString(9, (String) data.getOrDefault("medicamentos_uso_continuo", null));
+            stmt.setString(7, (String) data.get("alergias"));
+            stmt.setString(8, (String) data.get("historico_vacinacao"));
+            stmt.setString(9, (String) data.get("medicamentos_uso_continuo"));
             
-            // CORREÇÃO: Trata o booleano de forma segura
-            Object insulinObj = data.get("necessita_insulina");
-            stmt.setBoolean(10, "true".equalsIgnoreCase(String.valueOf(insulinObj)));
+            // Trata o booleano de forma segura
+            stmt.setBoolean(10, "true".equalsIgnoreCase(String.valueOf(data.get("necessita_insulina"))));
+
+            // --- FIM DA CORREÇÃO ---
 
             stmt.executeUpdate();
             resp.getWriter().write(gson.toJson(Map.of("success", true, "message", "Cadastro realizado com sucesso!")));
+
         } catch (Exception e) {
-            e.printStackTrace(); // Isso imprime o erro completo nos logs do Render
+            // Se um erro acontecer, ele será impresso nos logs do Render
+            e.printStackTrace(); 
             resp.setStatus(500);
             resp.getWriter().write(gson.toJson(Map.of("success", false, "message", "Erro interno no servidor: " + e.getMessage())));
         }

@@ -1,0 +1,9 @@
+com\meuprontuario\backend\DatabaseUtil.class
+com\meuprontuario\backend\LoginServlet.class
+com\meuprontuario\backend\CadastroServlet.class
+com\meuprontuario\backend\SolicitarConsultaServlet.class
+com\meuprontuario\backend\CorsFilter.class
+com\meuprontuario\backend\ListarSolicitacoesServlet.class
+com\meuprontuario\backend\AdicionarAtendimentoServlet.class
+com\meuprontuario\backend\CarregarProntuarioServlet.class
+com\meuprontuario\backend\BuscarPacientesServlet.class

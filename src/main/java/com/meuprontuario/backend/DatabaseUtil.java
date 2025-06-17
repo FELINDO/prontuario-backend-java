@@ -5,27 +5,32 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseUtil {
+    // As credenciais virão das variáveis de ambiente do servidor Render
     private static final String HOST = System.getenv("DB_HOST");
     private static final String DBNAME = System.getenv("DB_NAME");
     private static final String USER = System.getenv("DB_USER");
     private static final String PASSWORD = System.getenv("DB_PASSWORD");
     
-    // *** A CORREÇÃO DEFINITIVA ESTÁ AQUI ***
-    // Adicionamos DOIS parâmetros: `sslmode=require` E `gssEncMode=disable`
-    // Esta combinação resolve o conflito de autenticação com o Neon.
-    private static final String URL = String.format("jdbc:postgresql://%s/%s?sslmode=require&gssEncMode=disable", HOST, DBNAME);
+    // *** URL DE CONEXÃO FINAL E ROBUSTA ***
+    // Adiciona timeouts e a configuração de segurança completa para o Neon.
+    private static final String URL = String.format(
+        "jdbc:postgresql://%s/%s?sslmode=require&connectTimeout=30&socketTimeout=30",
+        HOST,
+        DBNAME
+    );
 
     static {
         try {
             // Carrega o driver do PostgreSQL
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Erro ao carregar o driver do PostgreSQL", e);
+            // Se o driver não for encontrado, o erro será claro
+            throw new RuntimeException("Driver JDBC do PostgreSQL não encontrado. Verifique o pom.xml.", e);
         }
     }
 
     public static Connection getConnection() throws SQLException {
-        // Agora este método usará a URL 100% compatível.
+        // Este método agora é mais paciente e robusto
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }

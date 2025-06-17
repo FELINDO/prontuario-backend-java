@@ -5,18 +5,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseUtil {
-    // As credenciais virão das variáveis de ambiente do servidor Render
     private static final String HOST = System.getenv("DB_HOST");
     private static final String DBNAME = System.getenv("DB_NAME");
     private static final String USER = System.getenv("DB_USER");
     private static final String PASSWORD = System.getenv("DB_PASSWORD");
-
-    // A URL de conexão JDBC para o PostgreSQL
-    private static final String URL = String.format("jdbc:postgresql://%s/%s", HOST, DBNAME);
+    
+    // *** AQUI ESTÁ A CORREÇÃO ***
+    // Adicionamos o parâmetro `?gssEncMode=disable` ao final da URL
+    private static final String URL = String.format("jdbc:postgresql://%s/%s?gssEncMode=disable", HOST, DBNAME);
 
     static {
         try {
-            // Carrega o driver do PostgreSQL
             Class.forName("org.postgresql.Driver");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Erro ao carregar o driver do PostgreSQL", e);

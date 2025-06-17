@@ -12,7 +12,7 @@ public class DatabaseUtil {
     
     // *** AQUI ESTÁ A CORREÇÃO ***
     // Adicionamos o parâmetro `?gssEncMode=disable` ao final da URL
-    private static final String URL = String.format("jdbc:postgresql://%s/%s?gssEncMode=disable", HOST, DBNAME);
+    private static final String URL = String.format("jdbc:postgresql://%s/%s?sslmode=require", HOST, DBNAME);
 
     static {
         try {
